@@ -33,6 +33,10 @@ public:
 	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent , Category = Units)
 	void MoveTo(FVector Target);
 	
+	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent , Category = Units)
+	void StartSelection();
 	
+	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent , Category = Units)
+	void StopSelection();
 };
 
