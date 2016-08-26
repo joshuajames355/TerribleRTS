@@ -21,7 +21,7 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 	
 	
-	UPROPERTY(EditDefaultsOnly, Category = Units)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Units)
 	int32 TeamNumber;
 	
 	UPROPERTY(EditDefaultsOnly, Category = Units)
@@ -38,5 +38,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent , Category = Units)
 	void StopSelection();
+	
+	UPROPERTY(EditDefaultsOnly , BlueprintReadOnly, Category = Units)
+	UTexture2D* UnitIcon;
 };
 
