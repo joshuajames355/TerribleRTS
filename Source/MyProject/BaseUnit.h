@@ -21,7 +21,7 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 	
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Units)
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = Units)
 	int32 TeamNumber;
 	
 	UPROPERTY(EditDefaultsOnly, Category = Units)
