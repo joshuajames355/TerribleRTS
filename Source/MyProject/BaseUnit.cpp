@@ -25,3 +25,12 @@ void ABaseUnit::Tick( float DeltaTime )
 	Super::Tick( DeltaTime );
 
 }
+
+void ABaseUnit::AttackUnit(AActor* Target)
+{
+    ABaseUnit* TargetUnit = Cast<ABaseUnit>(Target);
+    if(TargetUnit->TeamNumber != TeamNumber)
+    {
+      AttackAnimations(Target);
+    }
+}

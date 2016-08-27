@@ -30,6 +30,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Units)
 	float CurrentHealth;
 	
+	UPROPERTY(EditDefaultsOnly, Category = Units)
+	float Range;
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = Units)
+	float Health;
+	
+	UPROPERTY(EditDefaultsOnly, Category = Units)
+	float Damage;
+	
 	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent , Category = Units)
 	void MoveTo(FVector Target);
 	
@@ -41,5 +50,11 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly , BlueprintReadOnly, Category = Units)
 	UTexture2D* UnitIcon;
+	
+	UFUNCTION(BlueprintImplementableEvent , Category = Units)
+	void AttackAnimations(AActor* Target);
+	
+	UFUNCTION(BlueprintCallable,Category = Units)
+	void AttackUnit(AActor* Target);
 };
 
