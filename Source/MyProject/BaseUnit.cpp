@@ -29,8 +29,19 @@ void ABaseUnit::Tick( float DeltaTime )
 void ABaseUnit::AttackUnit(AActor* Target)
 {
     ABaseUnit* TargetUnit = Cast<ABaseUnit>(Target);
-    if(TargetUnit->TeamNumber != TeamNumber)
+    FVector distance = Target->GetActorLocation() - GetActorLocation();
+    if(TargetUnit->TeamNumber != TeamNumber && distance.Size() <= Range)
     {
+      FCollisionQueryParams collisionParam = FCollisionQueryParams();
+      FHitResult HitOut;
+      FVector endPos = Target->GetActorLocation();
+      collisionParam.AddIgnoredActor(this);
+      GetWorld()->LineTraceSingleByChannel(HitOut,GetActorLocation(),endPos,ECC_Visibility,collisionParam);
+      
+      if(HitOut.GetActor()->GetClass()->IsChildOf(ABaseUnit::StaticClass()))
+      {
+      UGameplayStatics::ApplyDamage(HitOut.GetActor(), Damage, GetController(), this, UDamageType::StaticClass());
       AttackAnimations(Target);
+      }
     }
 }
