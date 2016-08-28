@@ -28,20 +28,49 @@ void ABaseUnit::Tick( float DeltaTime )
 
 void ABaseUnit::AttackUnit(AActor* Target)
 {
-    ABaseUnit* TargetUnit = Cast<ABaseUnit>(Target);
-    FVector distance = Target->GetActorLocation() - GetActorLocation();
-    if(TargetUnit->TeamNumber != TeamNumber && distance.Size() <= Range)
+    if(!IsDead)
     {
-      FCollisionQueryParams collisionParam = FCollisionQueryParams();
-      FHitResult HitOut;
-      FVector endPos = Target->GetActorLocation();
-      collisionParam.AddIgnoredActor(this);
-      GetWorld()->LineTraceSingleByChannel(HitOut,GetActorLocation(),endPos,ECC_Visibility,collisionParam);
-      
-      if(HitOut.GetActor()->GetClass()->IsChildOf(ABaseUnit::StaticClass()))
+      ABaseUnit* TargetUnit = Cast<ABaseUnit>(Target);
+      FVector distance = Target->GetActorLocation() - GetActorLocation();
+      if(TargetUnit->TeamNumber != TeamNumber && distance.Size() <= Range)
       {
-      UGameplayStatics::ApplyDamage(HitOut.GetActor(), Damage, GetController(), this, UDamageType::StaticClass());
-      AttackAnimations(Target);
+	FCollisionQueryParams collisionParam = FCollisionQueryParams();
+	FHitResult HitOut;
+	FVector endPos = Target->GetActorLocation();
+	collisionParam.AddIgnoredActor(this);
+	GetWorld()->LineTraceSingleByChannel(HitOut,GetActorLocation(),endPos,ECC_Visibility,collisionParam);
+      
+	if(HitOut.GetActor()->GetClass()->IsChildOf(ABaseUnit::StaticClass()))
+	{
+	UGameplayStatics::ApplyDamage(HitOut.GetActor(), Damage, GetController(), this, UDamageType::StaticClass());
+	AttackAnimations(Target);
+	}
       }
     }
 }
+
+float ABaseUnit::TakeDamage(float DamageAmount,struct FDamageEvent const & DamageEvent,class AController * EventInstigator,AActor * DamageCauser)
+{
+  IsDead = true;
+  Health -= DamageAmount;
+  DebugTest();
+  if(Health <= 0)
+  {
+    DeathAnimations();
+  }
+  return DamageAmount;
+  
+}
+
+
+void ABaseUnit::MoveTo(FVector Target)
+{
+  
+  if(!IsDead)
+  {
+    AAIController* ai = Cast<AAIController>(GetController());
+    ai->MoveToLocation(Target,50.0f);
+  }
+  
+}
+

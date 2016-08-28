@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "AIController.h"
 #include "GameFramework/Actor.h"
 #include "BaseUnit.generated.h"
 
@@ -20,15 +21,10 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 	
+	virtual float TakeDamage(float DamageAmount,struct FDamageEvent const & DamageEvent,class AController * EventInstigator,AActor * DamageCauser) override;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = Units)
 	int32 TeamNumber;
-	
-	UPROPERTY(EditDefaultsOnly, Category = Units)
-	float StartingHealth;
-	
-	UPROPERTY(BlueprintReadOnly, Category = Units)
-	float CurrentHealth;
 	
 	UPROPERTY(EditDefaultsOnly, Category = Units)
 	float Range;
@@ -39,7 +35,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Units)
 	float Damage;
 	
-	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent , Category = Units)
+	bool IsDead = false;
+	
+	UFUNCTION(BlueprintCallable, Category = Units)
 	void MoveTo(FVector Target);
 	
 	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent , Category = Units)
@@ -53,6 +51,12 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent , Category = Units)
 	void AttackAnimations(AActor* Target);
+	
+	UFUNCTION(BlueprintImplementableEvent , Category = Units)
+	void DeathAnimations();
+	
+	UFUNCTION(BlueprintImplementableEvent , Category = Units)
+	void DebugTest();
 	
 	UFUNCTION(BlueprintCallable,Category = Units)
 	void AttackUnit(AActor* Target);
