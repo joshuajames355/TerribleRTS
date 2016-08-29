@@ -60,5 +60,14 @@ public:
 	
 	UFUNCTION(BlueprintCallable,Category = Units)
 	void AttackUnit(AActor* Target);
+	
+	UPROPERTY(EditDefaultsOnly,Category = Units)
+	float DestroyActorDelay;
+	
+private: 
+  
+  FTimerHandle DeathTimer;
+  
+  void DestroyActor();
 };
 

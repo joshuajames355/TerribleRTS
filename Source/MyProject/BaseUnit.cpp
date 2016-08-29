@@ -57,6 +57,7 @@ float ABaseUnit::TakeDamage(float DamageAmount,struct FDamageEvent const & Damag
   if(Health <= 0)
   {
     DeathAnimations();
+    GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &ABaseUnit::DestroyActor, DestroyActorDelay, false);
   }
   return DamageAmount;
   
@@ -72,5 +73,10 @@ void ABaseUnit::MoveTo(FVector Target)
     ai->MoveToLocation(Target,50.0f);
   }
   
+}
+
+void ABaseUnit::DestroyActor()
+{
+  Destroy();
 }
 
