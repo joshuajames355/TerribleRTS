@@ -64,10 +64,19 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category = Units)
 	float DestroyActorDelay;
 	
+	UPROPERTY(EditDefaultsOnly,Category = Units)
+	float FireRate;
+	
 private: 
   
   FTimerHandle DeathTimer;
   
   void DestroyActor();
+  
+  FTimerHandle FireTimer;
+  
+  void ResetFire();
+  
+  bool CanFire = true;
 };
 

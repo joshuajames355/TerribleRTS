@@ -28,7 +28,7 @@ void ABaseUnit::Tick( float DeltaTime )
 
 void ABaseUnit::AttackUnit(AActor* Target)
 {
-    if(!IsDead)
+    if(!IsDead && CanFire)
     {
       ABaseUnit* TargetUnit = Cast<ABaseUnit>(Target);
       FVector distance = Target->GetActorLocation() - GetActorLocation();
@@ -42,7 +42,9 @@ void ABaseUnit::AttackUnit(AActor* Target)
       
 	if(HitOut.GetActor()->GetClass()->IsChildOf(ABaseUnit::StaticClass()))
 	{
+	CanFire = false;
 	UGameplayStatics::ApplyDamage(HitOut.GetActor(), Damage, GetController(), this, UDamageType::StaticClass());
+	GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ABaseUnit::ResetFire, FireRate, false);
 	AttackAnimations(Target);
 	}
       }
@@ -78,5 +80,10 @@ void ABaseUnit::MoveTo(FVector Target)
 void ABaseUnit::DestroyActor()
 {
   Destroy();
+}
+
+void ABaseUnit::ResetFire()
+{
+  CanFire = true;
 }
 
