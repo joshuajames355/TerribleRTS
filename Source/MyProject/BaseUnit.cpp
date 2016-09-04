@@ -71,7 +71,7 @@ void ABaseUnit::MoveTo(FVector Target)
   
   if(!IsDead)
   {
-    AAIController* ai = Cast<AAIController>(GetController());
+	AAIController* ai = Cast<AAIController>(GetController());
     ai->MoveToLocation(Target,50.0f);
   }
   
