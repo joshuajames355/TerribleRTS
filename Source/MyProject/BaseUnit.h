@@ -29,7 +29,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Units)
 	float Range;
 	
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = Units)
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Replicated, Category = Units)
 	float Health;
 	
 	UPROPERTY(EditDefaultsOnly, Category = Units)

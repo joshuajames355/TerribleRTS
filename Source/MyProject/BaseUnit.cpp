@@ -2,6 +2,7 @@
 
 #include "MyProject.h"
 #include "BaseUnit.h"
+#include "UnrealNetwork.h"
 
 
 // Sets default values
@@ -10,6 +11,14 @@ ABaseUnit::ABaseUnit()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+}
+
+void ABaseUnit::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Replicate to everyone
+	DOREPLIFETIME(ABaseUnit, Health);
 }
 
 // Called when the game starts or when spawned
