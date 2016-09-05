@@ -45,7 +45,7 @@ void ABaseUnit::AttackUnit(AActor* Target)
 	CanFire = false;
 	UGameplayStatics::ApplyDamage(HitOut.GetActor(), Damage, GetController(), this, UDamageType::StaticClass());
 	GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ABaseUnit::ResetFire, FireRate, false);
-	AttackAnimations(Target);
+	AttackAnimationsMulticast(Target);
 	}
       }
     }
@@ -58,7 +58,7 @@ float ABaseUnit::TakeDamage(float DamageAmount,struct FDamageEvent const & Damag
   DebugTest();
   if(Health <= 0)
   {
-    DeathAnimations();
+	DeathAnimationMulticast();
     GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &ABaseUnit::DestroyActor, DestroyActorDelay, false);
   }
   return DamageAmount;
@@ -78,6 +78,26 @@ void ABaseUnit::MoveTo_Implementation(FVector Target)
 }
 
 bool ABaseUnit::MoveTo_Validate(FVector Target)
+{
+	return true;
+}
+
+void ABaseUnit::AttackAnimationsMulticast_Implementation(AActor* Target)
+{
+	AttackAnimations(Target);
+}
+
+bool ABaseUnit::AttackAnimationsMulticast_Validate(AActor* Target)
+{
+	return true;
+}
+
+void ABaseUnit::DeathAnimationMulticast_Implementation()
+{
+	DeathAnimations();
+}
+
+bool ABaseUnit::DeathAnimationMulticast_Validate()
 {
 	return true;
 }

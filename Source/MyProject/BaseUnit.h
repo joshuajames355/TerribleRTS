@@ -54,6 +54,12 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent , Category = Units)
 	void DeathAnimations();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void DeathAnimationMulticast();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void AttackAnimationsMulticast(AActor* Target);
 	
 	UFUNCTION(BlueprintImplementableEvent , Category = Units)
 	void DebugTest();
