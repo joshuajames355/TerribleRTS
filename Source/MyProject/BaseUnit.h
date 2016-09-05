@@ -37,7 +37,7 @@ public:
 	
 	bool IsDead = false;
 	
-	UFUNCTION(BlueprintCallable, Category = Units)
+	UFUNCTION(BlueprintCallable,Server, Reliable, WithValidation, Category = Units)
 	void MoveTo(FVector Target);
 	
 	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent , Category = Units)

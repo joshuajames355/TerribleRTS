@@ -66,7 +66,7 @@ float ABaseUnit::TakeDamage(float DamageAmount,struct FDamageEvent const & Damag
 }
 
 
-void ABaseUnit::MoveTo(FVector Target)
+void ABaseUnit::MoveTo_Implementation(FVector Target)
 {
   
   if(!IsDead)
@@ -75,6 +75,11 @@ void ABaseUnit::MoveTo(FVector Target)
     ai->MoveToLocation(Target,50.0f);
   }
   
+}
+
+bool ABaseUnit::MoveTo_Validate(FVector Target)
+{
+	return true;
 }
 
 void ABaseUnit::DestroyActor()
