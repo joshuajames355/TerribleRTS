@@ -10,7 +10,6 @@ ABaseUnit::ABaseUnit()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 void ABaseUnit::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
@@ -24,6 +23,7 @@ void ABaseUnit::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLife
 // Called when the game starts or when spawned
 void ABaseUnit::BeginPlay()
 {
+	SetupHealthBar();
 	Super::BeginPlay();
 	
 }

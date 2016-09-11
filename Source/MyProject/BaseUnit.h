@@ -36,7 +36,7 @@ public:
 	float Damage;
 	
 	bool IsDead = false;
-	
+
 	UFUNCTION(BlueprintCallable,Server, Reliable, WithValidation, Category = Units)
 	void MoveTo(FVector Target);
 	
@@ -54,6 +54,9 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent , Category = Units)
 	void DeathAnimations();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Units)
+	void SetupHealthBar();
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void DeathAnimationMulticast();
