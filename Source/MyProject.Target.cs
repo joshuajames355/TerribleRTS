@@ -8,6 +8,7 @@ public class MyProjectTarget : TargetRules
 	public MyProjectTarget(TargetInfo Target)
 	{
 		Type = TargetType.Game;
+        bUsesSteam = true;
 	}
 
 	//
