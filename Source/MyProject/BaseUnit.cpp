@@ -33,9 +33,38 @@ void ABaseUnit::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
+	if (CanFire) 
+	{
+		FindTarget();
+	}
+
 }
 
-void ABaseUnit::AttackUnit(AActor* Target)
+void ABaseUnit::FindTarget()
+{
+	TArray<FHitResult> HitOut;
+	FVector EndPos = GetActorLocation() + FVector(Range, 0.0f, 0.0f);
+	FCollisionQueryParams collisionParam = FCollisionQueryParams();
+	collisionParam.AddIgnoredActor(this);
+	GetWorld()->SweepMultiByChannel(HitOut, GetActorLocation(), EndPos, FQuat(), ECC_Visibility, FCollisionShape::MakeSphere(Range), collisionParam);
+	for (FHitResult hit : HitOut)
+	{
+		if (hit.GetActor())
+		{
+			if (hit.GetActor()->IsA(ABaseUnit::StaticClass()))
+			{
+				ABaseUnit* EnemyUnit = Cast<ABaseUnit>(hit.GetActor());
+				if (EnemyUnit->TeamNumber != TeamNumber)
+				{
+					AttackUnit(hit.GetActor());
+					break;
+				}
+			}
+		}
+	}
+}
+
+void ABaseUnit::AttackUnit_Implementation(AActor* Target)
 {
     if(!IsDead && CanFire)
     {
@@ -43,21 +72,26 @@ void ABaseUnit::AttackUnit(AActor* Target)
       FVector distance = Target->GetActorLocation() - GetActorLocation();
       if(TargetUnit->TeamNumber != TeamNumber && distance.Size() <= Range)
       {
-	FCollisionQueryParams collisionParam = FCollisionQueryParams();
-	FHitResult HitOut;
-	FVector endPos = Target->GetActorLocation();
-	collisionParam.AddIgnoredActor(this);
-	GetWorld()->LineTraceSingleByChannel(HitOut,GetActorLocation(),endPos,ECC_Visibility,collisionParam);
-      
-	if(HitOut.GetActor()->GetClass()->IsChildOf(ABaseUnit::StaticClass()))
-	{
-	CanFire = false;
-	UGameplayStatics::ApplyDamage(HitOut.GetActor(), Damage, GetController(), this, UDamageType::StaticClass());
-	GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ABaseUnit::ResetFire, FireRate, false);
-	AttackAnimationsMulticast(Target);
-	}
+		FCollisionQueryParams collisionParam = FCollisionQueryParams();
+		FHitResult HitOut;
+		FVector endPos = Target->GetActorLocation();
+		collisionParam.AddIgnoredActor(this);
+		GetWorld()->LineTraceSingleByChannel(HitOut,GetActorLocation(),endPos,ECC_Visibility,collisionParam);
+		if(HitOut.GetActor()){
+			if (HitOut.GetActor()->GetClass()->IsChildOf(ABaseUnit::StaticClass()))
+			{
+				CanFire = false;
+				UGameplayStatics::ApplyDamage(HitOut.GetActor(), Damage, GetController(), this, UDamageType::StaticClass());
+				GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ABaseUnit::ResetFire, FireRate, false);
+				AttackAnimationsMulticast(Target);
+			}
+		}
       }
     }
+}
+bool ABaseUnit::AttackUnit_Validate(AActor* Target)
+{
+	return true;
 }
 
 float ABaseUnit::TakeDamage(float DamageAmount,struct FDamageEvent const & DamageEvent,class AController * EventInstigator,AActor * DamageCauser)

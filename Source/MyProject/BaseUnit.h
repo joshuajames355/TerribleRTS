@@ -65,7 +65,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void AttackAnimationsMulticast(AActor* Target);
 	
-	UFUNCTION(BlueprintCallable,Category = Units)
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = Units)
 	void AttackUnit(AActor* Target);
 	
 	UPROPERTY(EditDefaultsOnly,Category = Units)
@@ -73,6 +73,8 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly,Category = Units)
 	float FireRate;
+
+	void FindTarget();
 	
 private: 
   
