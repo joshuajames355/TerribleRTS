@@ -23,7 +23,7 @@ public:
 	
 	virtual float TakeDamage(float DamageAmount,struct FDamageEvent const & DamageEvent,class AController * EventInstigator,AActor * DamageCauser) override;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = Units)
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Replicated, Category = Units)
 	int32 TeamNumber;
 	
 	UPROPERTY(EditDefaultsOnly, Category = Units)
@@ -34,7 +34,8 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = Units)
 	float Damage;
-	
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = Units)
 	bool IsDead = false;
 
 	UFUNCTION(BlueprintCallable,Server, Reliable, WithValidation, Category = Units)
@@ -63,9 +64,6 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void AttackAnimationsMulticast(AActor* Target);
-	
-	UFUNCTION(BlueprintImplementableEvent , Category = Units)
-	void DebugTest();
 	
 	UFUNCTION(BlueprintCallable,Category = Units)
 	void AttackUnit(AActor* Target);

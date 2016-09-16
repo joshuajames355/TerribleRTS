@@ -62,11 +62,10 @@ void ABaseUnit::AttackUnit(AActor* Target)
 
 float ABaseUnit::TakeDamage(float DamageAmount,struct FDamageEvent const & DamageEvent,class AController * EventInstigator,AActor * DamageCauser)
 {
-  IsDead = true;
   Health -= DamageAmount;
-  DebugTest();
   if(Health <= 0)
   {
+	IsDead = true;
 	DeathAnimationMulticast();
     GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &ABaseUnit::DestroyActor, DestroyActorDelay, false);
   }
