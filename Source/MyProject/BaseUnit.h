@@ -79,6 +79,12 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly,Category = Units)
 	float FireRate;
+
+	UPROPERTY(EditDefaultsOnly, Category = Units)
+	bool HasWeapons;
+
+	UPROPERTY(EditDefaultsOnly, Category = Units)
+	bool CanBuild;
 	
 private: 
 

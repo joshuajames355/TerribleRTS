@@ -3,6 +3,7 @@
 #include "MyProject.h"
 #include "BaseUnit.h"
 #include "UnrealNetwork.h"
+#include "BaseBuilding.h"
 
 
 // Sets default values
@@ -32,11 +33,28 @@ void ABaseUnit::BeginPlay()
 }
 
 // Called every frame
-void ABaseUnit::Tick( float DeltaTime )
+void ABaseUnit::Tick(float DeltaTime)
 {
-	Super::Tick( DeltaTime );
+	Super::Tick(DeltaTime);
 
-	if (CanFire && TargetActor)
+	if (TargetActor)
+	{
+		bool IsEnemyDead;
+		if (TargetActor->IsA(ABaseUnit::StaticClass()))
+		{
+			IsEnemyDead = Cast<ABaseUnit>(TargetActor)->IsDead;
+		}
+		if (TargetActor->IsA(ABaseBuilding::StaticClass()))
+		{
+			IsEnemyDead = Cast<ABaseBuilding>(TargetActor)->IsDead;
+		}
+		if (IsEnemyDead)
+		{
+			TargetActor = nullptr;
+		}
+	}
+
+	if (CanFire && TargetActor && HasWeapons)
 	{
 		FVector distance = TargetActor->GetActorLocation() - GetActorLocation();
 		if (distance.Size() > Range)
@@ -48,13 +66,16 @@ void ABaseUnit::Tick( float DeltaTime )
 			}
 		}
 		else
-		{
-			ai->StopMovement();
-			IsMovingTowardsTarget = false;
+		{	
+			if (IsMovingTowardsTarget)
+			{
+				ai->StopMovement();
+				IsMovingTowardsTarget = false;
+			}
 			AttackUnit(TargetActor);
 		}
 	}
-	else if (CanFire)
+	else if (CanFire && HasWeapons)
 	{
 		FindTarget();
 	}
@@ -73,10 +94,23 @@ void ABaseUnit::FindTarget()
 	{
 		if (hit.GetActor())
 		{
-			if (hit.GetActor()->IsA(ABaseUnit::StaticClass()))
+			if (hit.GetActor()->IsA(ABaseUnit::StaticClass()) || hit.GetActor()->IsA(ABaseBuilding::StaticClass()))
 			{
-				ABaseUnit* EnemyUnit = Cast<ABaseUnit>(hit.GetActor());
-				if (EnemyUnit->TeamNumber != TeamNumber)
+				int32 EnemyTeamNumber;
+				bool IsEnemyDead;
+				if (hit.GetActor()->IsA(ABaseUnit::StaticClass()))
+				{
+					ABaseUnit* EnemyUnit = Cast<ABaseUnit>(hit.GetActor());
+					EnemyTeamNumber = EnemyUnit->TeamNumber;
+					IsEnemyDead = EnemyUnit->IsDead;
+				}
+				if (hit.GetActor()->IsA(ABaseBuilding::StaticClass()))
+				{
+					ABaseBuilding* EnemyUnit = Cast<ABaseBuilding>(hit.GetActor());
+					EnemyTeamNumber = EnemyUnit->TeamNumber;
+					IsEnemyDead = EnemyUnit->IsDead;
+				}
+				if (EnemyTeamNumber != TeamNumber && !IsEnemyDead)
 				{
 					AttackUnit(hit.GetActor());
 					break;
@@ -122,19 +156,37 @@ bool ABaseUnit::CheckLineOfSight(AActor* Target)
 
 void ABaseUnit::AttackUnit_Implementation(AActor* Target)
 {
-    if(!IsDead && CanFire)
+	if(!IsDead && CanFire && HasWeapons)
     {
-      ABaseUnit* TargetUnit = Cast<ABaseUnit>(Target);
-      FVector distance = Target->GetActorLocation() - GetActorLocation();
-      if(TargetUnit->TeamNumber != TeamNumber && distance.Size() <= Range)
-      {
-		if (CheckLineOfSight(Target))
+		int32 EnemyTeamNumber;
+		bool IsEnemyDead;
+		if (Target->IsA(ABaseUnit::StaticClass()))
 		{
-			CanFire = false;
-			UGameplayStatics::ApplyDamage(Target, Damage, GetController(), this, UDamageType::StaticClass());
-			GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ABaseUnit::ResetFire, FireRate, false);
-			AttackAnimationsMulticast(Target);
+			ABaseUnit* EnemyUnit = Cast<ABaseUnit>(Target);
+			EnemyTeamNumber = EnemyUnit->TeamNumber;
+			IsEnemyDead = EnemyUnit->IsDead;
 		}
+		else if (Target->IsA(ABaseBuilding::StaticClass()))
+		{
+			ABaseBuilding* EnemyUnit = Cast<ABaseBuilding>(Target);
+			EnemyTeamNumber = EnemyUnit->TeamNumber;
+			IsEnemyDead = EnemyUnit->IsDead;
+
+		}
+		else
+		{
+			return;
+		}
+		FVector distance = Target->GetActorLocation() - GetActorLocation();
+		if(EnemyTeamNumber != TeamNumber && distance.Size() <= Range && !IsEnemyDead)
+		{
+			if (CheckLineOfSight(Target))
+			{
+				CanFire = false;
+				UGameplayStatics::ApplyDamage(Target, Damage, GetController(), this, UDamageType::StaticClass());
+				GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ABaseUnit::ResetFire, FireRate, false);
+				AttackAnimationsMulticast(Target);
+			}
 		
       }
     }
