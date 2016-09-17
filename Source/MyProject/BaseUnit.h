@@ -23,7 +23,7 @@ public:
 	
 	virtual float TakeDamage(float DamageAmount,struct FDamageEvent const & DamageEvent,class AController * EventInstigator,AActor * DamageCauser) override;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Replicated, Category = Units)
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = Units)
 	int32 TeamNumber;
 	
 	UPROPERTY(EditDefaultsOnly, Category = Units)
@@ -31,6 +31,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Replicated, Category = Units)
 	float Health;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = Units)
+	float StartingHealth;
 	
 	UPROPERTY(EditDefaultsOnly, Category = Units)
 	float Damage;
@@ -66,6 +69,9 @@ public:
 	void AttackAnimationsMulticast(AActor* Target);
 	
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = Units)
+	void SetTarget(AActor* Target);
+	
+	UFUNCTION(Server, Reliable, WithValidation, Category = Units)
 	void AttackUnit(AActor* Target);
 	
 	UPROPERTY(EditDefaultsOnly,Category = Units)
@@ -73,19 +79,30 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly,Category = Units)
 	float FireRate;
-
-	void FindTarget();
 	
 private: 
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void SetStartingHealth();
+
+	AActor* TargetActor;
+
+	AAIController* ai;
   
-  FTimerHandle DeathTimer;
+	FTimerHandle DeathTimer;
+
+	void FindTarget();
+
+	bool CheckLineOfSight(AActor* Target);
   
-  void DestroyActor();
+	void DestroyActor();
   
-  FTimerHandle FireTimer;
+	FTimerHandle FireTimer;
   
-  void ResetFire();
+	void ResetFire();
   
-  bool CanFire = true;
+	bool CanFire = true;
+
+	bool IsMovingTowardsTarget = false;
 };
 

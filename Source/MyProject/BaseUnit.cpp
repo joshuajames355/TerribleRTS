@@ -18,12 +18,15 @@ void ABaseUnit::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLife
 
 	// Replicate to everyone
 	DOREPLIFETIME(ABaseUnit, Health);
+	DOREPLIFETIME(ABaseUnit, StartingHealth);
 }
 
 // Called when the game starts or when spawned
 void ABaseUnit::BeginPlay()
 {
 	SetupHealthBar();
+	SetStartingHealth();
+	ai = Cast<AAIController>(GetController());
 	Super::BeginPlay();
 	
 }
@@ -33,10 +36,29 @@ void ABaseUnit::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
-	if (CanFire) 
+	if (CanFire && TargetActor)
+	{
+		FVector distance = TargetActor->GetActorLocation() - GetActorLocation();
+		if (distance.Size() > Range)
+		{
+			if (!IsMovingTowardsTarget)
+			{
+				IsMovingTowardsTarget = true;
+				ai->MoveToLocation(TargetActor->GetActorLocation(), 50.0f);
+			}
+		}
+		else
+		{
+			ai->StopMovement();
+			IsMovingTowardsTarget = false;
+			AttackUnit(TargetActor);
+		}
+	}
+	else if (CanFire)
 	{
 		FindTarget();
 	}
+	
 
 }
 
@@ -63,6 +85,40 @@ void ABaseUnit::FindTarget()
 		}
 	}
 }
+void ABaseUnit::SetTarget_Implementation(AActor* Target)
+{
+	IsMovingTowardsTarget = true;
+	ai->MoveToActor(Target, 50.0f);
+	TargetActor = Target;
+}
+
+bool ABaseUnit::SetTarget_Validate(AActor* Target)
+{
+	return true;
+}
+
+bool ABaseUnit::CheckLineOfSight(AActor* Target)
+{
+	FCollisionQueryParams collisionParam = FCollisionQueryParams();
+	FHitResult HitOut;
+	FVector endPos = Target->GetActorLocation();
+	collisionParam.AddIgnoredActor(this);
+	GetWorld()->LineTraceSingleByChannel(HitOut, GetActorLocation(), endPos, ECC_Visibility, collisionParam);
+	if (HitOut.GetActor()) {
+		if (HitOut.GetActor() == Target)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
 
 void ABaseUnit::AttackUnit_Implementation(AActor* Target)
 {
@@ -72,23 +128,18 @@ void ABaseUnit::AttackUnit_Implementation(AActor* Target)
       FVector distance = Target->GetActorLocation() - GetActorLocation();
       if(TargetUnit->TeamNumber != TeamNumber && distance.Size() <= Range)
       {
-		FCollisionQueryParams collisionParam = FCollisionQueryParams();
-		FHitResult HitOut;
-		FVector endPos = Target->GetActorLocation();
-		collisionParam.AddIgnoredActor(this);
-		GetWorld()->LineTraceSingleByChannel(HitOut,GetActorLocation(),endPos,ECC_Visibility,collisionParam);
-		if(HitOut.GetActor()){
-			if (HitOut.GetActor()->GetClass()->IsChildOf(ABaseUnit::StaticClass()))
-			{
-				CanFire = false;
-				UGameplayStatics::ApplyDamage(HitOut.GetActor(), Damage, GetController(), this, UDamageType::StaticClass());
-				GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ABaseUnit::ResetFire, FireRate, false);
-				AttackAnimationsMulticast(Target);
-			}
+		if (CheckLineOfSight(Target))
+		{
+			CanFire = false;
+			UGameplayStatics::ApplyDamage(Target, Damage, GetController(), this, UDamageType::StaticClass());
+			GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ABaseUnit::ResetFire, FireRate, false);
+			AttackAnimationsMulticast(Target);
 		}
+		
       }
     }
 }
+
 bool ABaseUnit::AttackUnit_Validate(AActor* Target)
 {
 	return true;
@@ -110,12 +161,11 @@ float ABaseUnit::TakeDamage(float DamageAmount,struct FDamageEvent const & Damag
 
 void ABaseUnit::MoveTo_Implementation(FVector Target)
 {
-  
-  if(!IsDead)
-  {
-	AAIController* ai = Cast<AAIController>(GetController());
-    ai->MoveToLocation(Target,50.0f);
-  }
+	TargetActor = nullptr;
+	if(!IsDead)
+	{
+		ai->MoveToLocation(Target,50.0f);
+	}
   
 }
 
@@ -153,4 +203,11 @@ void ABaseUnit::ResetFire()
 {
   CanFire = true;
 }
-
+void ABaseUnit::SetStartingHealth_Implementation()
+{
+	StartingHealth = Health;
+}
+bool ABaseUnit::SetStartingHealth_Validate()
+{
+	return true;
+}
