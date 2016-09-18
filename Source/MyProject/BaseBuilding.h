@@ -5,6 +5,18 @@
 #include "GameFramework/Actor.h"
 #include "BaseBuilding.generated.h"
 
+USTRUCT(BlueprintType)
+struct FBuildSettings
+{
+	GENERATED_USTRUCT_BODY()
+
+		UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Buildings)
+		UTexture2D* BuildingIcon;
+
+		UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Buildings)
+		TSubclassOf<AActor> BuildingGhost;
+};
+
 UCLASS()
 class MYPROJECT_API ABaseBuilding : public AActor
 {
@@ -31,6 +43,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Buildings)
 	float DestroyActorDelay;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Buildings)
+	FString BuildingTypeName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Buildings)
+	int32 Cost;
+
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void DeathAnimationMulticast();
 
@@ -42,6 +60,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Buildings)
 	int32 TeamNumber;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Buildings)
+	FBuildSettings BuildingSettings;
 
 private:
 	UFUNCTION(Server, Reliable, WithValidation)

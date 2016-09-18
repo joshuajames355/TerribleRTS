@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Units)
 	float Damage;
 
+	UPROPERTY(EditDefaultsOnly, Category = Units)
+	FName UnitTypeName;
+
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = Units)
 	bool IsDead = false;
 
@@ -83,7 +86,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Units)
 	bool HasWeapons;
 
-	UPROPERTY(EditDefaultsOnly, Category = Units)
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = Units)
 	bool CanBuild;
 	
 private: 
