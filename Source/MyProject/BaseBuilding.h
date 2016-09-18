@@ -58,7 +58,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = Buildings)
 	float StartingHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Buildings)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Buildings)
 	int32 TeamNumber;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Buildings)
@@ -66,6 +66,11 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Buildings)
 	void SetupHealthBar();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void AssistBuilding(float MaxAmount);
+
+	bool ConstructionFinished = false;
 
 private:
 	UFUNCTION(Server, Reliable, WithValidation)

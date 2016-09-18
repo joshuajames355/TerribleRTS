@@ -59,6 +59,7 @@ void ABaseBuilding::DestroyActor()
 void ABaseBuilding::SetStartingHealth_Implementation()
 {
 	StartingHealth = Health;
+	Health = 0;
 }
 bool ABaseBuilding::SetStartingHealth_Validate()
 {
@@ -71,6 +72,33 @@ void ABaseBuilding::DeathAnimationMulticast_Implementation()
 }
 
 bool ABaseBuilding::DeathAnimationMulticast_Validate()
+{
+	return true;
+}
+
+void ABaseBuilding::AssistBuilding_Implementation(float MaxAmount)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Assist"));
+	if (!IsDead)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Assist Not Dead"));
+		if (Health + MaxAmount <= StartingHealth)
+		{
+			Health += MaxAmount;
+		}
+		else if (Health < StartingHealth)
+		{
+			Health = StartingHealth;
+		}
+		if (!ConstructionFinished && Health == StartingHealth)
+		{
+			ConstructionFinished = true;
+		}
+
+	}
+}
+
+bool ABaseBuilding::AssistBuilding_Validate(float MaxAmount)
 {
 	return true;
 }

@@ -76,6 +76,9 @@ public:
 	
 	UFUNCTION(Server, Reliable, WithValidation, Category = Units)
 	void AttackUnit(AActor* Target);
+
+	UFUNCTION(Server, Reliable, WithValidation, Category = Units)
+	void BuildRepair(AActor* Target, float DeltaTime);
 	
 	UPROPERTY(EditDefaultsOnly,Category = Units)
 	float DestroyActorDelay;
@@ -88,6 +91,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = Units)
 	bool CanBuild;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Units)
+	float BuildRate;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void HealUnit(float MaxAmount);
 	
 private: 
 

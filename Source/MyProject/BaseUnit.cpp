@@ -75,6 +75,27 @@ void ABaseUnit::Tick(float DeltaTime)
 			AttackUnit(TargetActor);
 		}
 	}
+	else if (CanBuild && TargetActor)
+	{
+		FVector distance = TargetActor->GetActorLocation() - GetActorLocation();
+		if (distance.Size() > Range)
+		{
+			if (!IsMovingTowardsTarget)
+			{
+				IsMovingTowardsTarget = true;
+				ai->MoveToLocation(TargetActor->GetActorLocation(), 50.0f);
+			}
+		}
+		else
+		{
+			if (IsMovingTowardsTarget)
+			{
+				ai->StopMovement();
+				IsMovingTowardsTarget = false;
+			}
+			BuildRepair(TargetActor, DeltaTime);
+		}
+	}
 	else if (CanFire && HasWeapons)
 	{
 		FindTarget();
@@ -197,6 +218,56 @@ bool ABaseUnit::AttackUnit_Validate(AActor* Target)
 	return true;
 }
 
+void ABaseUnit::BuildRepair_Implementation(AActor* Target , float DeltaTime)
+{
+	UE_LOG(LogTemp, Warning, TEXT("BuildRepair"));
+	int32 TargetTeamNumber;
+	bool IsTargetDead;
+	float TargetHealth;
+	float TargetStartingHealth;
+	if (Target->IsA(ABaseUnit::StaticClass()))
+	{
+		ABaseUnit* EnemyUnit = Cast<ABaseUnit>(Target);
+		TargetTeamNumber = EnemyUnit->TeamNumber;
+		IsTargetDead = EnemyUnit->IsDead;
+		TargetHealth = EnemyUnit->Health;
+		TargetStartingHealth = EnemyUnit->StartingHealth;
+	}
+	else if (Target->IsA(ABaseBuilding::StaticClass()))
+	{
+		ABaseBuilding* EnemyUnit = Cast<ABaseBuilding>(Target);
+		TargetTeamNumber = EnemyUnit->TeamNumber;
+		IsTargetDead = EnemyUnit->IsDead;
+		TargetHealth = EnemyUnit->Health;
+		TargetStartingHealth = EnemyUnit->StartingHealth;
+	}
+	else
+	{
+		return;
+	}
+	if (!IsTargetDead && TargetTeamNumber == TeamNumber && TargetHealth < TargetStartingHealth)
+	{
+		if (Target->IsA(ABaseUnit::StaticClass()))
+		{
+			ABaseUnit* EnemyUnit = Cast<ABaseUnit>(Target);
+			EnemyUnit->HealUnit(BuildRate * DeltaTime);
+		}
+		else if(Target->IsA(ABaseBuilding::StaticClass()))
+		{
+			ABaseBuilding* EnemyUnit = Cast<ABaseBuilding>(Target);
+			UE_LOG(LogTemp, Warning, TEXT("BuildRepair Sent Assist"));
+			EnemyUnit->AssistBuilding(BuildRate * DeltaTime);
+		}
+	}
+}
+
+bool ABaseUnit::BuildRepair_Validate(AActor* Target, float DeltaTime)
+{
+	return true;
+}
+
+
+
 float ABaseUnit::TakeDamage(float DamageAmount,struct FDamageEvent const & DamageEvent,class AController * EventInstigator,AActor * DamageCauser)
 {
   Health -= DamageAmount;
@@ -260,6 +331,25 @@ void ABaseUnit::SetStartingHealth_Implementation()
 	StartingHealth = Health;
 }
 bool ABaseUnit::SetStartingHealth_Validate()
+{
+	return true;
+}
+
+void ABaseUnit::HealUnit_Implementation(float MaxAmount)
+{
+	if (!IsDead)
+	{
+		if (Health + MaxAmount <= StartingHealth)
+		{
+			Health += MaxAmount;
+		}
+		else if (Health < StartingHealth)
+		{
+			Health = StartingHealth;
+		}
+	}
+}
+bool ABaseUnit::HealUnit_Validate(float MaxAmount)
 {
 	return true;
 }
