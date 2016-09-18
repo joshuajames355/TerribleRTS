@@ -52,7 +52,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void DeathAnimationMulticast();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = Units)
+	UFUNCTION(BlueprintImplementableEvent, Category = Buildings)
 	void DeathAnimations();
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = Buildings)
@@ -63,6 +63,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Buildings)
 	FBuildSettings BuildingSettings;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Buildings)
+	void SetupHealthBar();
 
 private:
 	UFUNCTION(Server, Reliable, WithValidation)

@@ -17,7 +17,9 @@ ABaseBuilding::ABaseBuilding()
 void ABaseBuilding::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	SetStartingHealth();
+	SetupHealthBar();
 }
 
 void ABaseBuilding::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
