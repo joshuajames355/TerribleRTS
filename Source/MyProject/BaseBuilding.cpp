@@ -18,7 +18,10 @@ void ABaseBuilding::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetStartingHealth();
+	if (Role == ROLE_Authority)
+	{
+		SetStartingHealth();
+	}
 	SetupHealthBar();
 }
 

@@ -86,6 +86,9 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category = Units)
 	float FireRate;
 
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = Units)
+	float SightRange;
+
 	UPROPERTY(EditDefaultsOnly, Category = Units)
 	bool HasWeapons;
 

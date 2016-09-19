@@ -25,8 +25,11 @@ void ABaseUnit::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLife
 // Called when the game starts or when spawned
 void ABaseUnit::BeginPlay()
 {
+	if (Role == ROLE_Authority)
+	{
+		SetStartingHealth();
+	}
 	SetupHealthBar();
-	SetStartingHealth();
 	ai = Cast<AAIController>(GetController());
 	Super::BeginPlay();
 	
@@ -36,7 +39,10 @@ void ABaseUnit::BeginPlay()
 void ABaseUnit::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	if (Role == ROLE_SimulatedProxy)
+	{
+		return;
+	}
 	if (TargetActor)
 	{
 		bool IsEnemyDead;
