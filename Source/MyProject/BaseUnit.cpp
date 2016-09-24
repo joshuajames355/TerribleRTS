@@ -5,7 +5,6 @@
 #include "UnrealNetwork.h"
 #include "BaseBuilding.h"
 
-
 // Sets default values
 ABaseUnit::ABaseUnit()
 {
@@ -39,28 +38,22 @@ void ABaseUnit::BeginPlay()
 void ABaseUnit::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (Role == ROLE_SimulatedProxy)
+	if (!GetWorld()->IsServer())
 	{
 		return;
 	}
 	if (TargetActor)
 	{
-		bool IsEnemyDead;
-		if (TargetActor->IsA(ABaseUnit::StaticClass()))
+		if (TargetActor->GetClass()->ImplementsInterface(UCanTakeDamage::StaticClass()))
 		{
-			IsEnemyDead = Cast<ABaseUnit>(TargetActor)->IsDead;
-		}
-		if (TargetActor->IsA(ABaseBuilding::StaticClass()))
-		{
-			IsEnemyDead = Cast<ABaseBuilding>(TargetActor)->IsDead;
-		}
-		if (IsEnemyDead)
-		{
-			TargetActor = nullptr;
+			if (ICanTakeDamage::Execute_GetIsDead(TargetActor))
+			{
+				TargetActor = nullptr;
+			}
 		}
 	}
 
-	if (CanFire && TargetActor && HasWeapons)
+	if (CanFire && TargetActor && Damage > 0)
 	{
 		FVector distance = TargetActor->GetActorLocation() - GetActorLocation();
 		if (distance.Size() > Range)
@@ -81,7 +74,7 @@ void ABaseUnit::Tick(float DeltaTime)
 			AttackUnit(TargetActor);
 		}
 	}
-	else if (CanBuild && TargetActor)
+	else if (BuildRate > 0 && TargetActor)
 	{
 		FVector distance = TargetActor->GetActorLocation() - GetActorLocation();
 		if (distance.Size() > Range)
@@ -102,16 +95,15 @@ void ABaseUnit::Tick(float DeltaTime)
 			BuildRepair(TargetActor, DeltaTime);
 		}
 	}
-	else if (CanFire && HasWeapons)
+	else if (CanFire && Damage > 0)
 	{
 		FindTarget();
 	}
-	
-
 }
 
 void ABaseUnit::FindTarget()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Find Target"));
 	TArray<FHitResult> HitOut;
 	FVector EndPos = GetActorLocation() + FVector(Range, 0.0f, 0.0f);
 	FCollisionQueryParams collisionParam = FCollisionQueryParams();
@@ -119,33 +111,17 @@ void ABaseUnit::FindTarget()
 	GetWorld()->SweepMultiByChannel(HitOut, GetActorLocation(), EndPos, FQuat(), ECC_Visibility, FCollisionShape::MakeSphere(Range), collisionParam);
 	for (FHitResult hit : HitOut)
 	{
-		if (hit.GetActor())
+		if (hit.GetActor()->GetClass()->ImplementsInterface(UCanTakeDamage::StaticClass()))
 		{
-			if (hit.GetActor()->IsA(ABaseUnit::StaticClass()) || hit.GetActor()->IsA(ABaseBuilding::StaticClass()))
+			if(!ICanTakeDamage::Execute_GetIsDead(hit.GetActor()) && ICanTakeDamage::Execute_GetTeamNumber(hit.GetActor()) != TeamNumber)
 			{
-				int32 EnemyTeamNumber;
-				bool IsEnemyDead;
-				if (hit.GetActor()->IsA(ABaseUnit::StaticClass()))
-				{
-					ABaseUnit* EnemyUnit = Cast<ABaseUnit>(hit.GetActor());
-					EnemyTeamNumber = EnemyUnit->TeamNumber;
-					IsEnemyDead = EnemyUnit->IsDead;
-				}
-				if (hit.GetActor()->IsA(ABaseBuilding::StaticClass()))
-				{
-					ABaseBuilding* EnemyUnit = Cast<ABaseBuilding>(hit.GetActor());
-					EnemyTeamNumber = EnemyUnit->TeamNumber;
-					IsEnemyDead = EnemyUnit->IsDead;
-				}
-				if (EnemyTeamNumber != TeamNumber && !IsEnemyDead)
-				{
-					AttackUnit(hit.GetActor());
-					break;
-				}
+				AttackUnit(hit.GetActor());
+				return;
 			}
 		}
 	}
 }
+
 void ABaseUnit::SetTarget_Implementation(AActor* Target)
 {
 	IsMovingTowardsTarget = true;
@@ -170,52 +146,23 @@ bool ABaseUnit::CheckLineOfSight(AActor* Target)
 		{
 			return true;
 		}
-		else
-		{
-			return false;
-		}
-	}
-	else
-	{
 		return false;
 	}
+	return false;
 }
 
 void ABaseUnit::AttackUnit_Implementation(AActor* Target)
 {
-	if(!IsDead && CanFire && HasWeapons)
+	if(!IsDead && CanFire && Damage > 0 && Target->GetClass()->ImplementsInterface(UCanTakeDamage::StaticClass()))
     {
-		int32 EnemyTeamNumber;
-		bool IsEnemyDead;
-		if (Target->IsA(ABaseUnit::StaticClass()))
-		{
-			ABaseUnit* EnemyUnit = Cast<ABaseUnit>(Target);
-			EnemyTeamNumber = EnemyUnit->TeamNumber;
-			IsEnemyDead = EnemyUnit->IsDead;
-		}
-		else if (Target->IsA(ABaseBuilding::StaticClass()))
-		{
-			ABaseBuilding* EnemyUnit = Cast<ABaseBuilding>(Target);
-			EnemyTeamNumber = EnemyUnit->TeamNumber;
-			IsEnemyDead = EnemyUnit->IsDead;
-
-		}
-		else
-		{
-			return;
-		}
 		FVector distance = Target->GetActorLocation() - GetActorLocation();
-		if(EnemyTeamNumber != TeamNumber && distance.Size() <= Range && !IsEnemyDead)
+		if(ICanTakeDamage::Execute_GetTeamNumber(Target) != TeamNumber && distance.Size() <= Range && !ICanTakeDamage::Execute_GetIsDead(Target) && CheckLineOfSight(Target))
 		{
-			if (CheckLineOfSight(Target))
-			{
 				CanFire = false;
 				UGameplayStatics::ApplyDamage(Target, Damage, GetController(), this, UDamageType::StaticClass());
 				GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ABaseUnit::ResetFire, FireRate, false);
 				AttackAnimationsMulticast(Target);
-			}
-		
-      }
+		}
     }
 }
 
@@ -224,55 +171,16 @@ bool ABaseUnit::AttackUnit_Validate(AActor* Target)
 	return true;
 }
 
-void ABaseUnit::BuildRepair_Implementation(AActor* Target , float DeltaTime)
+void ABaseUnit::BuildRepair(AActor* Target , float DeltaTime)
 {
-	UE_LOG(LogTemp, Warning, TEXT("BuildRepair"));
-	int32 TargetTeamNumber;
-	bool IsTargetDead;
-	float TargetHealth;
-	float TargetStartingHealth;
-	if (Target->IsA(ABaseUnit::StaticClass()))
+	if (Target->GetClass()->ImplementsInterface(UCanTakeDamage::StaticClass()))
 	{
-		ABaseUnit* EnemyUnit = Cast<ABaseUnit>(Target);
-		TargetTeamNumber = EnemyUnit->TeamNumber;
-		IsTargetDead = EnemyUnit->IsDead;
-		TargetHealth = EnemyUnit->Health;
-		TargetStartingHealth = EnemyUnit->StartingHealth;
-	}
-	else if (Target->IsA(ABaseBuilding::StaticClass()))
-	{
-		ABaseBuilding* EnemyUnit = Cast<ABaseBuilding>(Target);
-		TargetTeamNumber = EnemyUnit->TeamNumber;
-		IsTargetDead = EnemyUnit->IsDead;
-		TargetHealth = EnemyUnit->Health;
-		TargetStartingHealth = EnemyUnit->StartingHealth;
-	}
-	else
-	{
-		return;
-	}
-	if (!IsTargetDead && TargetTeamNumber == TeamNumber && TargetHealth < TargetStartingHealth)
-	{
-		if (Target->IsA(ABaseUnit::StaticClass()))
+		if (!ICanTakeDamage::Execute_GetIsDead(Target) && ICanTakeDamage::Execute_GetTeamNumber(Target) == TeamNumber)
 		{
-			ABaseUnit* EnemyUnit = Cast<ABaseUnit>(Target);
-			EnemyUnit->HealUnit(BuildRate * DeltaTime);
-		}
-		else if(Target->IsA(ABaseBuilding::StaticClass()))
-		{
-			ABaseBuilding* EnemyUnit = Cast<ABaseBuilding>(Target);
-			UE_LOG(LogTemp, Warning, TEXT("BuildRepair Sent Assist"));
-			EnemyUnit->AssistBuilding(BuildRate * DeltaTime);
+			ICanTakeDamage::Execute_Repair(Target,BuildRate * DeltaTime);
 		}
 	}
 }
-
-bool ABaseUnit::BuildRepair_Validate(AActor* Target, float DeltaTime)
-{
-	return true;
-}
-
-
 
 float ABaseUnit::TakeDamage(float DamageAmount,struct FDamageEvent const & DamageEvent,class AController * EventInstigator,AActor * DamageCauser)
 {
@@ -286,7 +194,6 @@ float ABaseUnit::TakeDamage(float DamageAmount,struct FDamageEvent const & Damag
   return DamageAmount;
   
 }
-
 
 void ABaseUnit::MoveTo_Implementation(FVector Target)
 {
@@ -332,18 +239,25 @@ void ABaseUnit::ResetFire()
 {
   CanFire = true;
 }
+
 void ABaseUnit::SetStartingHealth_Implementation()
 {
 	StartingHealth = Health;
 }
+
 bool ABaseUnit::SetStartingHealth_Validate()
 {
 	return true;
 }
 
-void ABaseUnit::HealUnit_Implementation(float MaxAmount)
+bool ABaseUnit::GetIsDead_Implementation()
 {
-	if (!IsDead)
+	return IsDead;
+}
+
+void ABaseUnit::Repair_Implementation(float MaxAmount)
+{
+	if (!IsDead && GetWorld()->IsServer())
 	{
 		if (Health + MaxAmount <= StartingHealth)
 		{
@@ -354,8 +268,14 @@ void ABaseUnit::HealUnit_Implementation(float MaxAmount)
 			Health = StartingHealth;
 		}
 	}
-}
-bool ABaseUnit::HealUnit_Validate(float MaxAmount)
+ }
+
+int32 ABaseUnit::GetTeamNumber_Implementation()
 {
-	return true;
+	return TeamNumber;
+ }
+
+void ABaseUnit::SetTeamNumber_Implementation(int32 NewTeamNumber)
+{
+	TeamNumber = NewTeamNumber;
 }

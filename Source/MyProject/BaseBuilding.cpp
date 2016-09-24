@@ -79,12 +79,10 @@ bool ABaseBuilding::DeathAnimationMulticast_Validate()
 	return true;
 }
 
-void ABaseBuilding::AssistBuilding_Implementation(float MaxAmount)
+void ABaseBuilding::Repair_Implementation(float MaxAmount)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Assist"));
 	if (!IsDead)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Assist Not Dead"));
 		if (Health + MaxAmount <= StartingHealth)
 		{
 			Health += MaxAmount;
@@ -101,7 +99,17 @@ void ABaseBuilding::AssistBuilding_Implementation(float MaxAmount)
 	}
 }
 
-bool ABaseBuilding::AssistBuilding_Validate(float MaxAmount)
+bool ABaseBuilding::GetIsDead_Implementation()
 {
-	return true;
+	return IsDead;
+}
+
+int32 ABaseBuilding::GetTeamNumber_Implementation()
+{
+	return TeamNumber;
+}
+
+void ABaseBuilding::SetTeamNumber_Implementation(int32 NewTeamNumber)
+{
+	TeamNumber = NewTeamNumber;
 }

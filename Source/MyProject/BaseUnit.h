@@ -4,10 +4,11 @@
 
 #include "AIController.h"
 #include "GameFramework/Actor.h"
+#include "CanTakeDamage.h"
 #include "BaseUnit.generated.h"
 
 UCLASS()
-class MYPROJECT_API ABaseUnit : public ACharacter
+class MYPROJECT_API ABaseUnit : public ACharacter , public ICanTakeDamage
 {
 	GENERATED_BODY()
 	
@@ -35,7 +36,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = Units)
 	float StartingHealth;
 	
-	UPROPERTY(EditDefaultsOnly, Category = Units)
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = Units)
 	float Damage;
 
 	UPROPERTY(EditDefaultsOnly, Category = Units)
@@ -77,7 +78,7 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation, Category = Units)
 	void AttackUnit(AActor* Target);
 
-	UFUNCTION(Server, Reliable, WithValidation, Category = Units)
+	UFUNCTION()
 	void BuildRepair(AActor* Target, float DeltaTime);
 	
 	UPROPERTY(EditDefaultsOnly,Category = Units)
@@ -86,21 +87,17 @@ public:
 	UPROPERTY(EditDefaultsOnly,Category = Units)
 	float FireRate;
 
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = Units)
-	float SightRange;
-
-	UPROPERTY(EditDefaultsOnly, Category = Units)
-	bool HasWeapons;
-
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = Units)
-	bool CanBuild;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Units)
 	float BuildRate;
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void HealUnit(float MaxAmount);
-	
+	virtual bool GetIsDead_Implementation() override;
+
+	virtual void Repair_Implementation(float MaxAmount) override;
+
+	virtual int32 GetTeamNumber_Implementation() override;
+
+	virtual void SetTeamNumber_Implementation(int32 NewTeamNumber) override;
+
 private: 
 
 	UFUNCTION(Server, Reliable, WithValidation)

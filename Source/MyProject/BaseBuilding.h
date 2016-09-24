@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "CanTakeDamage.h"
 #include "BaseBuilding.generated.h"
 
 USTRUCT(BlueprintType)
@@ -18,7 +19,7 @@ struct FBuildSettings
 };
 
 UCLASS()
-class MYPROJECT_API ABaseBuilding : public AActor
+class MYPROJECT_API ABaseBuilding : public AActor, public ICanTakeDamage
 {
 	GENERATED_BODY()
 	
@@ -67,10 +68,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = Buildings)
 	void SetupHealthBar();
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void AssistBuilding(float MaxAmount);
-
 	bool ConstructionFinished = false;
+
+	virtual bool GetIsDead_Implementation() override;
+
+	virtual void Repair_Implementation(float MaxAmount) override;
+
+	virtual int32 GetTeamNumber_Implementation() override;
+
+	virtual void SetTeamNumber_Implementation(int32 NewTeamNumber) override;
 
 private:
 	UFUNCTION(Server, Reliable, WithValidation)
