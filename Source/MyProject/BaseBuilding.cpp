@@ -113,3 +113,8 @@ void ABaseBuilding::SetTeamNumber_Implementation(int32 NewTeamNumber)
 {
 	TeamNumber = NewTeamNumber;
 }
+
+bool ABaseBuilding::NeedsRepair_Implementation()
+{
+	return Health < StartingHealth;
+}

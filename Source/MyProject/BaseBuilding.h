@@ -78,6 +78,8 @@ public:
 
 	virtual void SetTeamNumber_Implementation(int32 NewTeamNumber) override;
 
+	virtual bool NeedsRepair_Implementation() override;
+
 private:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void SetStartingHealth();

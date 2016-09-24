@@ -3,6 +3,7 @@
 #include "MyProject.h"
 #include "BaseUnit.h"
 #include "UnrealNetwork.h"
+#include "RTSBasePlayerController.h"
 #include "BaseBuilding.h"
 
 // Sets default values
@@ -76,6 +77,11 @@ void ABaseUnit::Tick(float DeltaTime)
 	}
 	else if (BuildRate > 0 && TargetActor)
 	{
+		if (!ICanTakeDamage::Execute_NeedsRepair(TargetActor))
+		{
+			TargetActor = nullptr;
+			return;
+		}
 		FVector distance = TargetActor->GetActorLocation() - GetActorLocation();
 		if (distance.Size() > Range)
 		{
@@ -177,7 +183,19 @@ void ABaseUnit::BuildRepair(AActor* Target , float DeltaTime)
 	{
 		if (!ICanTakeDamage::Execute_GetIsDead(Target) && ICanTakeDamage::Execute_GetTeamNumber(Target) == TeamNumber)
 		{
-			ICanTakeDamage::Execute_Repair(Target,BuildRate * DeltaTime);
+			for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+			{
+				ARTSBasePlayerController* PC = Cast<ARTSBasePlayerController>(*Iterator);
+				if (PC)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("PlayerController has team %d."), PC->TeamNumber);
+					if (PC->TeamNumber == TeamNumber)
+					{
+						ICanTakeDamage::Execute_Repair(Target, PC->CalculateEffeciency(BuildRate * DeltaTime));
+						return;
+					}
+				}
+			}
 		}
 	}
 }
@@ -278,4 +296,9 @@ int32 ABaseUnit::GetTeamNumber_Implementation()
 void ABaseUnit::SetTeamNumber_Implementation(int32 NewTeamNumber)
 {
 	TeamNumber = NewTeamNumber;
+}
+
+bool ABaseUnit::NeedsRepair_Implementation()
+{
+	return Health < StartingHealth;
 }

@@ -32,6 +32,7 @@ public:
 
 	UFUNCTION(BlueprintCallable , BlueprintNativeEvent, Category = CanTakeDamage)
 	bool GetIsDead();
-	
-	
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = CanTakeDamage)
+	bool NeedsRepair();	
 };
