@@ -14,8 +14,8 @@ ARTSBasePlayerController::ARTSBasePlayerController()
 void ARTSBasePlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	float MoneyToAdd = DeltaTime * CalculateIncome();
+	CalculateIncome();
+	float MoneyToAdd = DeltaTime * CurrentIncome;
 	if (Money + MoneyToAdd < MaxMoney)
 	{
 		Money += MoneyToAdd;
@@ -75,15 +75,14 @@ bool ARTSBasePlayerController::NewEconomyBuilding_Validate(ABaseEconomyBuilding*
 	return true;
 }
 
-float ARTSBasePlayerController::CalculateIncome() 
+void ARTSBasePlayerController::CalculateIncome() 
 {
-	float TotalIncome = 0;
+	CurrentIncome = 0;
 	for (auto& EconomyBuilding : EconomyBuildings)
 	{
 		if (EconomyBuilding->ConstructionFinished && !ICanTakeDamage::Execute_GetIsDead(EconomyBuilding))
 		{
-			TotalIncome += EconomyBuilding->MoneyRate;
+			CurrentIncome += EconomyBuilding->MoneyRate;
 		}
 	}
-	return TotalIncome;
 }

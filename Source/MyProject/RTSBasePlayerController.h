@@ -41,5 +41,8 @@ public:
 
 	TArray<ABaseEconomyBuilding*> EconomyBuildings;
 
-	float CalculateIncome();
+	void CalculateIncome();
+
+	UPROPERTY(BlueprintReadonly, Replicated, Category = Economy)
+	float CurrentIncome;
 };
