@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
+#include "BaseEconomyBuilding.h"
 #include "RTSBasePlayerController.generated.h"
 
 /**
@@ -17,6 +18,8 @@ class MYPROJECT_API ARTSBasePlayerController : public APlayerController
 public:
 
 	ARTSBasePlayerController();
+
+	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(BlueprintReadonly, Replicated, Category = Economy)
 	float Money;
@@ -33,4 +36,10 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = Economy)
 	void SetTeamNumber(int32 NewTeamNumber);
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = Economy)
+	void NewEconomyBuilding(ABaseEconomyBuilding* NewEconomyBuilding);
+
+	TArray<ABaseEconomyBuilding*> EconomyBuildings;
+
+	float CalculateIncome();
 };
