@@ -81,11 +81,13 @@ bool ABaseBuilding::DeathAnimationMulticast_Validate()
 
 void ABaseBuilding::Repair_Implementation(float MaxAmount)
 {
+	float CostHPRatio = StartingHealth / Cost;
+	float HPIncrease = MaxAmount * CostHPRatio;
 	if (!IsDead)
 	{
-		if (Health + MaxAmount <= StartingHealth)
+		if (Health + HPIncrease <= StartingHealth)
 		{
-			Health += MaxAmount;
+			Health += HPIncrease;
 		}
 		else if (Health < StartingHealth)
 		{

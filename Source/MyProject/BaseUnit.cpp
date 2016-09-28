@@ -275,11 +275,13 @@ bool ABaseUnit::GetIsDead_Implementation()
 
 void ABaseUnit::Repair_Implementation(float MaxAmount)
 {
+	float CostHPRatio = StartingHealth / Cost;
+	float HPIncrease = MaxAmount * CostHPRatio;
 	if (!IsDead && GetWorld()->IsServer())
 	{
-		if (Health + MaxAmount <= StartingHealth)
+		if (Health + HPIncrease <= StartingHealth)
 		{
-			Health += MaxAmount;
+			Health += HPIncrease;
 		}
 		else if (Health < StartingHealth)
 		{
