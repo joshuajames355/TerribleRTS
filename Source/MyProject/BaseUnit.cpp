@@ -11,6 +11,9 @@ ABaseUnit::ABaseUnit()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
+	AIControllerClass = AAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 void ABaseUnit::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
@@ -25,6 +28,7 @@ void ABaseUnit::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLife
 // Called when the game starts or when spawned
 void ABaseUnit::BeginPlay()
 {
+	bReplicates = true;
 	if (Role == ROLE_Authority)
 	{
 		SetStartingHealth();
@@ -109,7 +113,6 @@ void ABaseUnit::Tick(float DeltaTime)
 
 void ABaseUnit::FindTarget()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Find Target"));
 	TArray<FHitResult> HitOut;
 	FVector EndPos = GetActorLocation() + FVector(Range, 0.0f, 0.0f);
 	FCollisionQueryParams collisionParam = FCollisionQueryParams();
@@ -188,7 +191,6 @@ void ABaseUnit::BuildRepair(AActor* Target , float DeltaTime)
 				ARTSBasePlayerController* PC = Cast<ARTSBasePlayerController>(*Iterator);
 				if (PC)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("PlayerController has team %d."), PC->TeamNumber);
 					if (PC->TeamNumber == TeamNumber)
 					{
 						ICanTakeDamage::Execute_Repair(Target, PC->CalculateEffeciency(BuildRate * DeltaTime));

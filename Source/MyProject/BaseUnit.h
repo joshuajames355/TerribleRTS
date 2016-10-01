@@ -42,7 +42,7 @@ public:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = Units)
 	float Damage;
 
-	UPROPERTY(EditDefaultsOnly, Category = Units)
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = Units)
 	FName UnitTypeName;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = Units)
