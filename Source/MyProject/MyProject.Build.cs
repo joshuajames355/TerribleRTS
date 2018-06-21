@@ -4,11 +4,11 @@ using UnrealBuildTool;
 
 public class MyProject : ModuleRules
 {
-	public MyProject(TargetInfo Target)
+	public MyProject(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","AIModule","OnlineSubsystem","OnlineSubsystemUtils"});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		//PrivateDependencyModuleNames.AddRange(new string[] {  });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

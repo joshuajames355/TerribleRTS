@@ -1,0 +1,18 @@
+trickle economy, supcom style 
+factory stuff, infinite control + individual factory control/group control.
+
+buildings:
+barracks
+factory
+airfield
+oil drills makes money.
+power generators.
+
+
+ww2 setting -> alternate history.
+
+units:
+infantry.
+tank.
+fighter.
+attack figher/bomber 
