@@ -86,3 +86,30 @@ void ARTSBasePlayerController::CalculateIncome()
 		}
 	}
 }
+
+void ARTSBasePlayerController::forwardMoveCommand(ABaseUnit * unit, FVector destination)
+{
+	forwardMoveCommandServer(unit, destination);
+}
+void ARTSBasePlayerController::forwardMoveCommandServer_Implementation(ABaseUnit * unit, FVector destination)
+{
+	unit->MoveTo(destination);
+}
+bool ARTSBasePlayerController::forwardMoveCommandServer_Validate(ABaseUnit * unit, FVector destination)
+{
+	return true;
+}
+
+void ARTSBasePlayerController::forwardAttackCommand(ABaseUnit * unit, AActor* target)
+{
+	forwardAttackCommandServer(unit, target);
+}
+void ARTSBasePlayerController::forwardAttackCommandServer_Implementation(ABaseUnit * unit, AActor* target)
+{
+	unit->SetTarget(target);
+}
+bool ARTSBasePlayerController::forwardAttackCommandServer_Validate(ABaseUnit * unit, AActor* target)
+{
+	return true;
+}
+

@@ -4,6 +4,7 @@
 
 #include "GameFramework/PlayerController.h"
 #include "BaseEconomyBuilding.h"
+#include "BaseUnit.h"
 #include "RTSBasePlayerController.generated.h"
 
 /**
@@ -45,4 +46,16 @@ public:
 
 	UPROPERTY(BlueprintReadonly, Replicated, Category = Economy)
 	float CurrentIncome;
+
+	UFUNCTION(BlueprintCallable)
+	void forwardMoveCommand(ABaseUnit* unit, FVector destination);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void forwardMoveCommandServer(ABaseUnit* unit, FVector destination);
+
+	UFUNCTION(BlueprintCallable)
+	void forwardAttackCommand(ABaseUnit* unit, AActor* target);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void forwardAttackCommandServer(ABaseUnit* unit, AActor* target);
 };
